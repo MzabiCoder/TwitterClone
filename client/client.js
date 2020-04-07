@@ -1,6 +1,7 @@
 const input = document.querySelector("#name");
 const form = document.querySelector(".new-form");
 const loading = document.querySelector(".loading");
+const loading2 = document.querySelector("#loading2");
 const section = document.querySelector('.tweets')
 loading.style.display = "none";
 const link = "http://localhost:5000/tweets";
@@ -12,13 +13,16 @@ setTimeout(() => {
 
 }, 1000)
 
+let skip = 0
+let limit = 5
+let load = false
+
 function tweets() {
-    //section.innerHTML = ''
-    fetch('http://localhost:5000/v2/tweets?limit=5&skip=0')
+    load = true
+    fetch(`http://localhost:5000/v2/tweets?limit=${limit}&skip=${skip}`)
         .then(res => res.json())
-        .then(reasult => {
-            // created.reverse()
-            reasult.tweets.forEach(tweet => {
+        .then(result => {
+            result.tweets.forEach(tweet => {
                 let div = document.createElement('div')
 
                 let header = document.createElement('h3')
@@ -34,9 +38,36 @@ function tweets() {
                 div.appendChild(date)
                 section.appendChild(div)
             })
+
+
+            result.meta.has_available ? document.querySelector('#loading2').style.opacity = 1 : document.querySelector('#loading2').style.opacity = 0
+            load = false
         })
 
+
 }
+document.addEventListener('scroll', moreLoad)
+
+function moreLoad() {
+    const {
+        scrollTop,
+        scrollHeight,
+        clientHeight
+    } = document.documentElement
+    if (scrollTop + scrollHeight >= clientHeight - 3) {
+        console.log('hellow')
+        skip += limit
+        console.log(limit)
+        tweets()
+    }
+
+    // const rect = loading2.getBoundingClientRect()
+    // if (rect.top < window.innerHeight) {
+    //     tweets()
+    // }
+
+}
+
 
 form.addEventListener("submit", (e) => {
     e.preventDefault();

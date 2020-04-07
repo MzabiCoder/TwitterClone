@@ -67,7 +67,7 @@ app.get("/v2/tweets", (req, res) => {
           total,
           skip,
           limit,
-          has_available: (total - limit) > 0,
+          has_available: total - (skip + limit) > 0,
         }
       })
     }).catch(err => {

@@ -28,3 +28,15 @@
     margin: 1rem auto;
     text-align: center;
 }
+
+.button-container {
+
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 2rem;
+}
+
+.button-container #loading2 {
+    transition: all .7s ease-in-out;
+}
