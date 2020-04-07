@@ -34,15 +34,62 @@ app.get("/tweets", async (req, res) => {
   }
 });
 
-app.use(
-  Limit({
-    windowMs: 30 * 1000, // 15 minutes
-    max: 1, // limit each IP to 100 requests per windowMs
-  })
-);
+app.get("/v2/tweets", (req, res) => {
+
+  // let skip = Number(req.query.skip) || 0
+  // let limit = Number(req.query.limit) || 5
+  let {
+    skip = 0,
+      limit = 10,
+      sort = 'desc',
+  } = req.query
+  skip = Number(skip) || 0
+  limit = Number(limit) || 10
+  limit = limit > 50 ? 50 : limit
+
+  skip = skip < 0 ? 0 : skip
+  limit = limit < 0 ? 10 : limit
+
+  Promise.all([
+      Tweet.countDocuments(),
+      Tweet.find({}, null, {
+        limit,
+        skip,
+        sort: {
+          date: sort === ' desc' ? -1 : 1
+        }
+      })
+    ])
+    .then(([total, tweets]) => {
+      res.json({
+        tweets: tweets,
+        meta: {
+          total,
+          skip,
+          limit,
+          has_available: (total - limit) > 0,
+        }
+      })
+    }).catch(err => {
+      res.json(err.message)
+    })
+
+
+
+});
+
+// app.use(
+//   Limit({
+//     windowMs: 30 * 1000, // 15 minutes
+//     max: 1, // limit each IP to 100 requests per windowMs
+//   })
+// );
 
 app.post("/tweets", async (req, res) => {
-  const { name, content } = req.body;
+  const {
+    name,
+    content
+  } = req.body;
 
   try {
     const tweet = await Tweet.findOne({
@@ -53,6 +100,14 @@ app.post("/tweets", async (req, res) => {
         message: "Already exists !!",
       });
     }
+
+    if (!name || !content) {
+      return res.status(400).json({
+        message: " content & name are required !!",
+      });
+    }
+
+
     const newTweet = new Tweet({
       name: filter.clean(name),
       content: filter.clean(content),

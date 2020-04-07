@@ -14,11 +14,11 @@ setTimeout(() => {
 
 function tweets() {
     //section.innerHTML = ''
-    fetch('http://localhost:5000/tweets')
+    fetch('http://localhost:5000/v2/tweets?limit=5&skip=0')
         .then(res => res.json())
-        .then(created => {
-            created.reverse()
-            created.forEach(tweet => {
+        .then(reasult => {
+            // created.reverse()
+            reasult.tweets.forEach(tweet => {
                 let div = document.createElement('div')
 
                 let header = document.createElement('h3')
